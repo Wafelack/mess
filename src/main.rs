@@ -1,4 +1,3 @@
-use colored::*;
 use lines_from_file::lines_from_file;
 
 fn main() {

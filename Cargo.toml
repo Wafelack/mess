@@ -8,4 +8,3 @@ edition = "2018"
 
 [dependencies]
 lines_from_file = "0.1.2"
-colored = "2"
