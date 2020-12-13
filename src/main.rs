@@ -2,8 +2,6 @@ use sha2::{Digest, Sha256};
 use hex;
 use chrono::prelude::*;
 use std::fmt::Formatter;
-use std::thread;
-use std::time::Duration;
 
 #[derive(Debug, Clone)]
 struct Block {
@@ -116,7 +114,7 @@ fn is_hash_valid(hash: String, difficulty: u32) -> bool {
 }
 
 fn main() {
-    let mut block_chain = Blockchain::init(2);
+    let mut block_chain = Blockchain::init(1);
     block_chain.add_block(5);
     block_chain.add_block(6);
     block_chain.add_block(7);
