@@ -41,7 +41,7 @@ impl Block {
 
 impl std::fmt::Display for Blockchain {
     fn fmt(&self, _f: &mut Formatter<'_>) -> std::fmt::Result{
-        println!("{{");
+        println!("[");
         for block in &self.blocks {
             println!("  {{");
             println!("    \"Index\": {},", block.index);
@@ -55,7 +55,7 @@ impl std::fmt::Display for Blockchain {
                 println!("  }},");
             }
         }
-        println!("}}");
+        println!("]");
 
         Ok(())
     }
