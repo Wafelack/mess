@@ -26,11 +26,8 @@ impl Block {
             i+=1;
             block.nonce = format!("{}", i);
             if !is_hash_valid(block.calculate_hash(), block.difficulty) {
-                println!("{} do more work !", block.calculate_hash());
-                
                 continue;
             } else {
-                println!("{} work done !", block.calculate_hash());
                 block.hash = block.calculate_hash();
                 break;
             }
@@ -114,7 +111,7 @@ fn is_hash_valid(hash: String, difficulty: u32) -> bool {
 }
 
 fn main() {
-    let mut block_chain = Blockchain::init(1);
+    let mut block_chain = Blockchain::init(4);
     block_chain.add_block(5);
     block_chain.add_block(6);
     block_chain.add_block(7);
