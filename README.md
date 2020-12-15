@@ -1,6 +1,6 @@
 # Blockchain
 
-![CI](![Build & Test](https://github.com/Wafelack/blockchain/workflows/Build%20&%20Test/badge.svg))
+![Build & Test](https://github.com/Wafelack/blockchain/workflows/Build%20&%20Test/badge.svg)
 
 A simple blockchain written in Rust
 
