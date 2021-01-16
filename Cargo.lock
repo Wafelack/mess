@@ -16,6 +16,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "blockchain"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "hex",
+ "sha2",
+]
+
+[[package]]
 name = "cfg-if"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -107,15 +116,6 @@ dependencies = [
  "cpuid-bool",
  "digest",
  "opaque-debug",
-]
-
-[[package]]
-name = "some_blockchain"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "hex",
- "sha2",
 ]
 
 [[package]]
