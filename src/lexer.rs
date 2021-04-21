@@ -128,4 +128,28 @@ mod lexing{
         assert_eq!(tokens, vec![Token::LParen, Token::RParen]);
         Ok(())
     }
+
+    #[test]
+    fn numbers() -> Result<()> {
+        let tokens = Lexer::new("42 3.1415").tokenize()?;
+
+        assert_eq!(tokens, vec![Token::Number(42), Token::Float(3.1415)]);
+        Ok(())
+    }
+
+    #[test]
+    fn string() -> Result<()> {
+        let tokens = Lexer::new(r#""foobar" 'moobar'"#).tokenize()?;
+
+        assert_eq!(tokens, vec![Token::String("foobar".to_string()), Token::String("moobar".to_string())]);
+        Ok(())
+    }
+
+    #[test]
+    fn identifier() -> Result<()> {
+        let tokens = Lexer::new("moow").tokenize()?;
+
+        assert_eq!(tokens, vec![Token::Identifier("moow".to_string())]);
+        Ok(())
+    }
 }
