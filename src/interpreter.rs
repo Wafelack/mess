@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, str, process::Command};
 use crate::{Result, Error, error, parser::Expr};
 
 #[derive(Clone, Debug, PartialEq)]
@@ -17,11 +17,11 @@ impl Value {
             Self::Unit => "Unit"
         }.to_string()
     }
-    pub fn get_lit(&self) -> String {
+    pub fn get(&self) -> String {
         match self {
             Self::Number(n) => format!("{}", n),
             Self::Float(f) => format!("{}", f),
-            Self::String(s) => format!("\"{}\"", s),
+            Self::String(s) => format!("{}", s),
             Self::Unit => "()".to_string(),
         }
     }
@@ -47,9 +47,7 @@ impl Interpreter {
         if self.builtins.contains_key(&func) {
             let callback = self.builtins[&func];
             callback(self, argv)
-        } else if !self.procedures.contains_key(&func) {
-            error!("Unbound procecure: {}.", func)
-        } else {
+        } else if self.procedures.contains_key(&func) {
             let (args, body) = self.procedures[&func].clone();
 
             if args.len() != argv.len() {
@@ -68,6 +66,29 @@ impl Interpreter {
 
                 self.eval_exprs(body)
             }
+        } else {
+
+            let mut args = vec![];
+
+            for arg in argv {
+                args.push(self.eval_expr(arg)?);
+            }
+
+            let out = match Command::new(func)
+                .args(args.iter().map(|v| v.get()).collect::<Vec<_>>())
+                .output() {
+                    Ok(o) => o,
+                    Err(e) => return error!("Failed to run command: {}.", e)
+                };
+
+
+            let stdout = match str::from_utf8(&out.stdout) {
+                Ok(s) => s,
+                Err(e) => return error!("Failed to get command output: {}.", e),
+            };
+
+
+            Ok(Value::String(stdout.trim().to_string()))
         }
 
     }

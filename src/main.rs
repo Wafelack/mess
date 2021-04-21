@@ -22,7 +22,7 @@ fn main() -> Result<()> {
         let ast = Parser::new(tokens).parse()?;
         interpreter.update_ast(ast);
         let output = interpreter.eval()?;
-        println!("#out <- {} :: {}", output.get_lit(), output.get_type());
+        println!("{}", output.get());
     }
 }
 
