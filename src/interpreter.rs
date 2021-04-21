@@ -106,7 +106,7 @@ impl Interpreter {
 
         panic!("Bug: UNTRIGGERED_RETURN");
     }
-    fn assign(&mut self, name: impl ToString, value: Expr) -> Result<Value> {
+    pub fn assign(&mut self, name: impl ToString, value: Expr) -> Result<Value> {
         let value = self.eval_expr(value)?;
         let name = name.to_string();
         if self.variables.contains_key(&name) {
@@ -126,7 +126,7 @@ impl Interpreter {
 
         Ok(Value::Unit)
     }
-    fn eval_expr(&mut self, expr: Expr) -> Result<Value> {
+    pub fn eval_expr(&mut self, expr: Expr) -> Result<Value> {
 
         match expr {
             Expr::Var(s) => if self.variables.contains_key(&s) {
@@ -151,6 +151,7 @@ impl Interpreter {
         self.register_builtin("-", Self::sub);
         self.register_builtin("*", Self::mul);
         self.register_builtin("/", Self::div);
+        self.register_builtin("cd", Self::cd);
     }
     pub fn eval(&mut self) -> Result<Value> {
         self.register_builtins();

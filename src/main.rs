@@ -10,11 +10,9 @@ use interpreter::Interpreter;
 use std::io::{self, Write};
 
 fn main() -> Result<()> {
-    let mut i = 0;
     let mut interpreter = Interpreter::new(vec![]);
     loop {
-        i += 1;
-        print!("(REPL:{:03}) ", i);
+        print!("% ");
         io::stdout().flush().unwrap();
         let mut buffer = String::new();
         io::stdin().read_line(&mut buffer).unwrap();
