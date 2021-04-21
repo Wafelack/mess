@@ -117,11 +117,7 @@ impl Parser {
                             args.push(self.parse_expr()?);
 
                         }
-
-                        if !self.is_at_end() {
-                            self.advance(Token::RParen)?;
-                        }
-
+                        self.advance(Token::RParen)?;
                         Expr::Call(function, args)
                     }
                     Token::RParen => Expr::Unit,
@@ -129,9 +125,7 @@ impl Parser {
                         let name = self.advance(Token::Identifier("".to_string()))?;
                         let value = self.parse_expr()?;
 
-                        if !self.is_at_end() {
-                            self.advance(Token::RParen)?;
-                        }
+                        self.advance(Token::RParen)?;
 
                         let name = if let Token::Identifier(name) = name {
                             name
@@ -169,9 +163,7 @@ impl Parser {
                             body.push(self.parse_expr()?);
                         }
 
-                        if !self.is_at_end() {
-                            self.advance(Token::RParen)?;
-                        }
+                        self.advance(Token::RParen)?;
 
                         Expr::Defun(name, args, body)
                     }
@@ -228,7 +220,7 @@ mod parsing {
 
         Ok(())
     }
-    
+
     #[test]
     fn r#let() -> Result<()> {
         let tokens = Lexer::new("(let foo #bar)").tokenize()?;

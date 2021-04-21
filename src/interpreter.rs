@@ -148,6 +148,9 @@ impl Interpreter {
     }
     fn register_builtins(&mut self) {
         self.register_builtin("+", Self::add);
+        self.register_builtin("-", Self::sub);
+        self.register_builtin("*", Self::mul);
+        self.register_builtin("/", Self::div);
     }
     pub fn eval(&mut self) -> Result<Value> {
         self.register_builtins();
