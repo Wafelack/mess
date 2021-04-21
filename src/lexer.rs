@@ -8,6 +8,7 @@ pub enum Token {
     Float(f32),
     LParen,
     RParen,
+    Quote,
 }
 
 pub struct Lexer {
@@ -53,7 +54,8 @@ impl Lexer {
         match c {
             '(' => self.add_token(Token::LParen),
             ')' => self.add_token(Token::RParen),
-            '"' | '\'' => self.string(c)?,
+            '"' => self.string()?,
+            '\'' => self.add_token(Token::Quote),
             ';' => while !self.is_at_end() && self.peek() != '\n' {
                 self.advance();
             }
@@ -99,8 +101,8 @@ impl Lexer {
             }
         }
     }
-    fn string(&mut self, delimiter: char) -> Result<()> {
-        while !self.is_at_end() && self.peek() != delimiter {
+    fn string(&mut self) -> Result<()> {
+        while !self.is_at_end() && !(self.peek() == '"' && self.input.chars().nth(self.current - 1).unwrap() != '\\') {
             self.advance();
         }
 
@@ -110,7 +112,7 @@ impl Lexer {
 
         self.advance();
 
-        self.add_token(Token::String(self.input[self.start + 1..self.current - 1].to_string()));
+        self.add_token(Token::String(self.input[self.start + 1..self.current - 1].replace("\\\"", "\"").to_string()));
 
         Ok(())
     }
@@ -139,9 +141,9 @@ mod lexing{
 
     #[test]
     fn string() -> Result<()> {
-        let tokens = Lexer::new(r#""foobar" 'moobar'"#).tokenize()?;
+        let tokens = Lexer::new(r#""foo bar \"moo\"""#).tokenize()?;
 
-        assert_eq!(tokens, vec![Token::String("foobar".to_string()), Token::String("moobar".to_string())]);
+        assert_eq!(tokens, vec![Token::String(r#"foo bar "moo""#.to_string())]);
         Ok(())
     }
 
@@ -152,4 +154,15 @@ mod lexing{
         assert_eq!(tokens, vec![Token::Identifier("moow".to_string())]);
         Ok(())
     }
+
+    #[test]
+    fn quote() -> Result<()> {
+        let tokens = Lexer::new("'").tokenize()?;
+
+        assert_eq!(tokens, vec![Token::Quote]);
+        Ok(())
+    }
+
+
+    
 }
