@@ -200,6 +200,26 @@ mod parsing {
     }
 
     #[test]
+    fn numbers() -> Result<()> {
+        let tokens = Lexer::new("42 3.1415926535897932").tokenize()?;
+        let ast = Parser::new(tokens).parse()?;
+
+        assert_eq!(ast, vec![Expr::Number(42), Expr::Float(3.1415926535897932)]);
+
+        Ok(())
+    }
+
+    #[test]
+    fn unit() -> Result<()> {
+        let tokens = Lexer::new("()").tokenize()?;
+        let ast = Parser::new(tokens).parse()?;
+
+        assert_eq!(ast, vec![Expr::Unit]);
+
+        Ok(())
+    }
+
+    #[test]
     fn variable() -> Result<()> {
         let tokens = Lexer::new("#foo").tokenize()?;
         let ast = Parser::new(tokens).parse()?;
@@ -208,5 +228,24 @@ mod parsing {
 
         Ok(())
     }
+    
+    #[test]
+    fn r#let() -> Result<()> {
+        let tokens = Lexer::new("(let foo #bar)").tokenize()?;
+        let ast = Parser::new(tokens).parse()?;
 
+        assert_eq!(ast, vec![Expr::Let("foo".to_string(), Box::new(Expr::Var("bar".to_string())))]);
+
+        Ok(())
+    }
+
+    #[test]
+    fn defun_call() -> Result<()> {
+        let tokens = Lexer::new("(defun (square x) (* #x #x))").tokenize()?;
+        let ast = Parser::new(tokens).parse()?;
+
+        assert_eq!(ast, vec![Expr::Defun("square".to_string(), vec!["x".to_string()], vec![Expr::Call("*".to_string(), vec![Expr::Var("x".to_string()), Expr::Var("x".to_string())])])]);
+
+        Ok(())
+    }
 }
