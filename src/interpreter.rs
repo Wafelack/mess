@@ -1,5 +1,5 @@
 use std::{collections::HashMap, str, process::Command};
-use crate::{Result, Error, error, parser::Expr};
+use crate::{apply_escape, Result, Error, error, parser::Expr};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Value {
@@ -88,7 +88,7 @@ impl Interpreter {
             };
 
 
-            Ok(Value::String(stdout.trim().to_string()))
+            Ok(Value::String(apply_escape(stdout.trim())))
         }
 
     }

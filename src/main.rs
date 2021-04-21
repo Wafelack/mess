@@ -36,3 +36,15 @@ macro_rules! error {
         Err(Error(format_args!($($arg)*).to_string()))
     }
 }
+
+pub fn apply_escape(input: &str) -> String {
+    input
+        .replace("\\x1b", "\x1b")
+        .replace("\\n", "\n")
+        .replace("\\r", "\r")
+        .replace("\\t", "\t")
+        .replace("\\0", "\0")
+        .replace("\\\\", "\\")
+        .to_string()
+}
+

@@ -1,4 +1,4 @@
-use crate::{Result, Error, error};
+use crate::{apply_escape, Result, Error, error};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Token {
@@ -135,12 +135,13 @@ impl Lexer {
 
         self.advance();
 
-        self.add_token(Token::String(self.input[self.start + 1..self.current - 1].to_string()));
+        self.add_token(Token::String(apply_escape(&self.input[self.start + 1..self.current - 1])));
 
         Ok(())
 
     }
 }
+
 
 #[cfg(test)]
 mod lexing{
