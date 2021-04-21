@@ -138,4 +138,14 @@ mod evaluation {
         Ok(())
     }
 
+    #[test]
+    fn procedures() -> Result<()> {
+        let tokens = Lexer::new("(defun (pi) 3.1415926535897932)(pi)").tokenize()?;
+        let ast = Parser::new(tokens).parse()?;
+        let out = Interpreter::new(ast).eval()?;
+        assert_eq!(out, Value::Float(3.1415926535897932));
+
+        Ok(())
+    }
+
 }
