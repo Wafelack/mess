@@ -152,6 +152,7 @@ impl Interpreter {
         self.register_builtin("*", Self::mul);
         self.register_builtin("/", Self::div);
         self.register_builtin("cd", Self::cd);
+        self.register_builtin("if", Self::r#if);
     }
     pub fn eval(&mut self) -> Result<Value> {
         self.register_builtins();
