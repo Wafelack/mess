@@ -9,6 +9,22 @@ pub enum Token {
     LParen,
     RParen,
     Sharp,
+    Defun,
+    Let,
+}
+impl Token {
+    pub fn get_type(&self) -> String {
+        match self {
+            Self::String(_) => "String",
+            Self::Identifier(_) => "Identifier",
+            Self::Number(_) => "Number",
+            Self::Float(_) => "Float",
+            Self::LParen => "Opening Parenthese",
+            Self::RParen => "Closing Parenthese",
+            Self::Sharp => "Sharp",
+            _ => "Keyword"
+        }.to_string()
+    }
 }
 
 pub struct Lexer {
@@ -76,7 +92,13 @@ impl Lexer {
             self.advance();
         }
 
-        self.add_token(Token::Identifier(self.input[self.start..self.current].to_string()));
+        let raw = self.input[self.start..self.current].to_string();
+
+        match raw.as_str() {
+            "let" => self.add_token(Token::Let),
+            "defun" => self.add_token(Token::Defun),
+            _ => self.add_token(Token::Identifier(raw))
+        }
     }
     fn number(&mut self) {
         while !self.is_at_end() && self.peek().is_digit(10) {
