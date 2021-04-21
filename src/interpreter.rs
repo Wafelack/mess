@@ -31,6 +31,7 @@ pub struct Interpreter {
     input: Vec<Expr>,
     variables: HashMap<String, Value>,
     procedures: HashMap<String, (Vec<String>, Vec<Expr>)>,
+    builtins: HashMap<String, fn(&mut Interpreter, Vec<Expr>) -> Result<Value>>,
 }
 
 impl Interpreter {
@@ -39,10 +40,14 @@ impl Interpreter {
             input,
             variables: HashMap::new(),
             procedures: HashMap::new(),
+            builtins: HashMap::new(),
         }
     }
     fn call(&mut self, func: String, argv: Vec<Expr>) -> Result<Value> {
-        if !self.procedures.contains_key(&func) {
+        if self.builtins.contains_key(&func) {
+            let callback = self.builtins[&func];
+            callback(self, argv)
+        } else if !self.procedures.contains_key(&func) {
             error!("Unbound procecure: {}.", func)
         } else {
             let (args, body) = self.procedures[&func].clone();
@@ -117,7 +122,14 @@ impl Interpreter {
             Expr::Defun(name, args, body) => self.procedure(name, args, body),
         }
     }
+    fn register_builtin(&mut self, builtin: impl ToString, associated: fn(&mut Interpreter, Vec<Expr>) -> Result<Value>) {
+        self.builtins.insert(builtin.to_string(), associated);
+    }
+    fn register_builtins(&mut self) {
+        self.register_builtin("+", Self::add);
+    }
     pub fn eval(&mut self) -> Result<Value> {
+        self.register_builtins();
         let input = self.input.clone();
         self.eval_exprs(input)
     }
