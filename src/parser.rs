@@ -1,4 +1,4 @@
-use std::mem::discriminant;
+use std::{mem::discriminant, collections::HashMap};
 use crate::{Result, error, Error, lexer::Token};
 
 #[derive(Clone, PartialEq, Debug)]
@@ -8,6 +8,7 @@ pub enum Expr {
     Number(i32),
     Float(f32),
     Array(Vec<Expr>),
+    Table(HashMap<String, Expr>),
     Let(String, Box<Expr>),
     Defun(String, Vec<String>, Vec<Expr>),
     Call(String, Vec<Expr>),
@@ -24,6 +25,7 @@ impl Expr {
             Self::Let(_, _) => "Variable Definition",
             Self::Defun(_, _, _) => "Procedure Definition",
             Self::Array(_) => "Array",
+            Self::Table(_) => "Table",
             Self::Unit => "Unit",
         }.to_string()
     }
@@ -147,6 +149,30 @@ impl Parser {
                         };
 
                         Expr::Let(name, Box::new(value))
+                    }
+                    Token::Table => {
+                        let mut table = HashMap::new();
+
+                        while !self.is_at_end() && self.peek().unwrap() != Token::RParen {
+                            self.advance(Token::LBracket)?;
+
+                            let key = self.advance(Token::String("".to_string()))?;
+                            let key = if let Token::String(s) = key {
+                                s
+                            } else {
+                                panic!("Bug: UNEXPECTED_NON_STRING");
+                            };
+
+                            let value = self.parse_expr()?;
+
+                            self.advance(Token::RBracket)?;
+
+                            table.insert(key, value);
+                        }
+
+                        self.advance(Token::RParen)?;
+
+                        Expr::Table(table)
                     }
                     Token::Defun => {
                         self.advance(Token::LParen)?;

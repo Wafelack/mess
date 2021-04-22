@@ -13,6 +13,7 @@ pub enum Token {
     Sharp,
     Defun,
     Let,
+    Table,
 }
 impl Token {
     pub fn get_type(&self) -> String {
@@ -103,6 +104,7 @@ impl Lexer {
         match raw.as_str() {
             "let" => self.add_token(Token::Let),
             "defun" => self.add_token(Token::Defun),
+            "table" => self.add_token(Token::Table),
             _ => self.add_token(Token::Identifier(raw))
         }
     }
