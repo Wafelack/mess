@@ -1,0 +1,60 @@
+   Compiling lish v0.1.0 (/home/wafelack/Documents/projects/lish)
+error[E0004]: non-exhaustive patterns: `Array(_)` not covered
+   --> src/interpreter.rs:160:15
+    |
+160 |           match expr {
+    |                 ^^^^ pattern `Array(_)` not covered
+    | 
+   ::: src/parser.rs:5:1
+    |
+5   | / pub enum Expr {
+6   | |     Var(String),
+7   | |     String(String),
+8   | |     Number(i32),
+9   | |     Float(f32),
+10  | |     Array(Vec<Expr>),
+    | |     ----- not covered
+...   |
+14  | |     Unit
+15  | | }
+    | |_- `Expr` defined here
+    |
+    = help: ensure that all possible cases are being handled, possibly by adding wildcards or more match arms
+    = note: the matched value is of type `Expr`
+
+warning: unused variable: `toret`
+  --> src/interpreter.rs:44:25
+   |
+44 |                     let mut toret = format!("┬{:─^idx_len$}┬{:─^longest$}┬", "@", idx_len=idx_len, longest=longest);
+   |                         ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_toret`
+   |
+   = note: `#[warn(unused_variables)]` on by default
+
+warning: unused variable: `idx`
+  --> src/interpreter.rs:46:26
+   |
+46 |                     for (idx, val) in stringified.into_iter().enumerate() {
+   |                          ^^^ help: if this is intentional, prefix it with an underscore: `_idx`
+
+warning: unused variable: `val`
+  --> src/interpreter.rs:46:31
+   |
+46 |                     for (idx, val) in stringified.into_iter().enumerate() {
+   |                               ^^^ help: if this is intentional, prefix it with an underscore: `_val`
+
+warning: variable does not need to be mutable
+  --> src/interpreter.rs:44:25
+   |
+44 |                     let mut toret = format!("┬{:─^idx_len$}┬{:─^longest$}┬", "@", idx_len=idx_len, longest=longest);
+   |                         ----^^^^^
+   |                         |
+   |                         help: remove this `mut`
+   |
+   = note: `#[warn(unused_mut)]` on by default
+
+error: aborting due to previous error; 4 warnings emitted
+
+For more information about this error, try `rustc --explain E0004`.
+error: could not compile `lish`
+
+To learn more, run the command again with --verbose.

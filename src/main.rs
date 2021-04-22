@@ -5,7 +5,7 @@ mod builtins;
 
 use lexer::Lexer;
 use parser::Parser;
-use interpreter::Interpreter;
+use interpreter::{Value, Interpreter};
 
 use std::io::{self, Write};
 
@@ -20,7 +20,11 @@ fn main() -> Result<()> {
         let ast = Parser::new(tokens).parse()?;
         interpreter.update_ast(ast);
         let output = interpreter.eval()?;
-        println!("{}", output.get());
+        if let Value::Unit = output {
+            continue;
+        } else {
+            println!("{}", output.get(false));
+        }
     }
 }
 

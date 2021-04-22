@@ -7,6 +7,7 @@ pub enum Expr {
     String(String),
     Number(i32),
     Float(f32),
+    Array(Vec<Expr>),
     Let(String, Box<Expr>),
     Defun(String, Vec<String>, Vec<Expr>),
     Call(String, Vec<Expr>),
@@ -21,7 +22,8 @@ impl Expr {
             Self::Float(_) => "Float",
             Self::Call(_, _) => "Function Call",
             Self::Let(_, _) => "Variable Definition",
-            Self::Defun(_, _, _) => "Function Definition",
+            Self::Defun(_, _, _) => "Procedure Definition",
+            Self::Array(_) => "Array",
             Self::Unit => "Unit",
         }.to_string()
     }
@@ -105,6 +107,17 @@ impl Parser {
                 } else {
                     panic!("Bug: UNEXPECTED_NON_IDENTIFIER");
                 }
+            }
+            Token::LBracket => {
+                let mut content = vec![];
+
+                while !self.is_at_end() && self.peek().unwrap() != Token::RBracket {
+                    content.push(self.parse_expr()?);
+                }
+
+                self.advance(Token::RBracket)?;
+
+                Expr::Array(content)
             }
             Token::RParen => return error!("Unexpected Closing Parenthese."),
             Token::LParen => {
@@ -227,6 +240,16 @@ mod parsing {
         let ast = Parser::new(tokens).parse()?;
 
         assert_eq!(ast, vec![Expr::Let("foo".to_string(), Box::new(Expr::Var("bar".to_string())))]);
+
+        Ok(())
+    }
+
+    #[test]
+    fn array() -> Result<()> {
+        let tokens = Lexer::new("[4 5 6]").tokenize()?;
+        let ast = Parser::new(tokens).parse()?;
+
+        assert_eq!(ast, vec![Expr::Array(vec![Expr::Number(4), Expr::Number(5), Expr::Number(6)])]);
 
         Ok(())
     }

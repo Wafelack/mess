@@ -6,22 +6,54 @@ pub enum Value {
     Number(i32),
     Float(f32),
     String(String),
+    Array(Vec<Value>),
     Unit
 }
 impl Value {
     pub fn get_type(&self) -> String {
         match self {
             Self::Number(_) => "Number",
+            Self::Array(_) => "Array",
             Self::Float(_) => "Float",
             Self::String(_) => "String",
             Self::Unit => "Unit"
         }.to_string()
     }
-    pub fn get(&self) -> String {
+    pub fn get(&self, inner: bool) -> String {
         match self {
             Self::Number(n) => format!("{}", n),
             Self::Float(f) => format!("{}", f),
             Self::String(s) => format!("{}", s),
+            Self::Array(vals) => {
+                if inner {
+                    format!("#<array {} rows>", vals.len())
+                } else {
+                    let mut stringified = vec![];
+                    let mut longest = 0;
+
+                    for val in vals {
+                        let stringy = val.get(true);
+                        if longest < stringy.len() {
+                            longest = stringy.len();
+                        }
+                        stringified.push(stringy);
+                    }
+
+                    let idx_len = format!("{}", stringified.len() - 1).len() + 2;
+                    longest += 2;
+                
+                    let mut toret = format!("{:─^idx_len$}┬{:─^longest$}\n", "", "", idx_len=idx_len, longest=longest);
+
+                    for (idx, val) in stringified.into_iter().enumerate() {
+                        toret.push_str(&format!("\x1b[1;32m{:^idx_len$}\x1b[0m│{:>longest$}\n", idx, val, idx_len=idx_len, longest=longest));                         
+                    }
+
+                    toret.push_str(&format!("{:─^idx_len$}┴{:─^longest$}\n", "", "", idx_len=idx_len, longest=longest));
+
+                    toret
+
+                }
+            }
             Self::Unit => "()".to_string(),
         }
     }
@@ -75,7 +107,7 @@ impl Interpreter {
             }
 
             let out = match Command::new(func)
-                .args(args.iter().map(|v| v.get()).collect::<Vec<_>>())
+                .args(args.iter().map(|v| v.get(false)).collect::<Vec<_>>())
                 .output() {
                     Ok(o) => o,
                     Err(e) => return error!("Failed to run command: {}.", e)
@@ -141,6 +173,15 @@ impl Interpreter {
             Expr::Call(func, argv) => self.call(func, argv),
             Expr::Let(name, value) => self.assign(name, *value),
             Expr::Defun(name, args, body) => self.procedure(name, args, body),
+            Expr::Array(content) => {
+                let mut values = vec![];
+
+                for elem in content {
+                    values.push(self.eval_expr(elem)?);
+                }
+
+                Ok(Value::Array(values))
+            }
         }
     }
     fn register_builtin(&mut self, builtin: impl ToString, associated: fn(&mut Interpreter, Vec<Expr>) -> Result<Value>) {

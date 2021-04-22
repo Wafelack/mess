@@ -8,6 +8,8 @@ pub enum Token {
     Float(f32),
     LParen,
     RParen,
+    LBracket,
+    RBracket,
     Sharp,
     Defun,
     Let,
@@ -21,6 +23,8 @@ impl Token {
             Self::Float(_) => "Float",
             Self::LParen => "Opening Parenthese",
             Self::RParen => "Closing Parenthese",
+            Self::LBracket => "Opening Bracket",
+            Self::RBracket => "Closing Bracket",
             Self::Sharp => "Sharp",
             _ => "Keyword"
         }.to_string()
@@ -70,6 +74,8 @@ impl Lexer {
         match c {
             '(' => self.add_token(Token::LParen),
             ')' => self.add_token(Token::RParen),
+            '[' => self.add_token(Token::LBracket),
+            ']' => self.add_token(Token::RBracket),
             '"' | '\'' => self.string(c)?,
             '#' => self.add_token(Token::Sharp),
             ';' => while !self.is_at_end() && self.peek() != '\n' {
