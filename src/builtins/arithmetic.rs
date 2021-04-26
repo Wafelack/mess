@@ -1,4 +1,4 @@
-use crate::{Result, error, Error, interpreter::Interpreter, value::Value, parser::Expr};
+use crate::{Result, error, Error, interpreter::Interpreter, value::Value};
 
 impl Interpreter {
     pub fn add(&mut self, args: Vec<Value>) -> Result<Value> {

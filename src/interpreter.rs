@@ -148,7 +148,7 @@ impl Interpreter {
                     vals.push(tmp);
                 }
 
-                Ok(Value::Table(keys, vals))
+                Ok(Value::Table(keys.into_iter().rev().collect::<Vec<String>>(), vals.into_iter().map(|v| v.into_iter().rev().collect::<Vec<Value>>()).collect::<Vec<Vec<Value>>>()))
             }
             Expr::Array(content) => {
                 Ok(Value::Array(content.into_iter().map(|e| self.eval_expr(e)).collect::<Result<Vec<Value>>>()?))
@@ -167,6 +167,7 @@ impl Interpreter {
         self.register_builtin("if", Self::r#if);
         self.register_builtin("@", Self::at);
         self.register_builtin("unquote", Self::unquote);
+        self.register_builtin("ls", Self::ls);
     }
     pub fn eval(&mut self) -> Result<Value> {
         self.register_builtins();

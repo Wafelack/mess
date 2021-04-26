@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use crate::parser::Expr;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -49,7 +48,7 @@ impl Value {
                 let mut first_row= format!("{:─^idx_len$}", "", idx_len=idx_len);
                 let mut second_row=  format!("\x1b[1;32m{:^idx_len$}\x1b[0m", "@", idx_len=idx_len);
 
-                for (idx, key) in keys.iter().rev().enumerate() {
+                for (idx, key) in keys.iter().enumerate() {
                     first_row.push_str(&format!("┬{:─^length$}", "", length=length[idx]));
                     second_row.push_str(&format!("│\x1b[1;32m{:^length$}\x1b[0m", key, length=length[idx]));
                 }
