@@ -7,7 +7,7 @@ pub enum Value {
     Float(f32),
     String(String),
     Array(Vec<Value>),
-    Table(HashMap<String, Value>),
+    Table(Vec<String>, Vec<Vec<Value>>),
     Quote(Expr),
     Unit
 }
@@ -19,7 +19,7 @@ impl Value {
             Self::Float(_) => "Float",
             Self::String(_) => "String",
             Self::Unit => "Unit",
-            Self::Table(_) => "Table",
+            Self::Table(_, _) => "Table",
             Self::Quote(_) => "Quote",
         }.to_string()
     }
@@ -29,64 +29,47 @@ impl Value {
             Self::Float(f) => format!("{}", f),
             Self::String(s) => format!("{}", s),
             Self::Quote(expr) => format!("<#quote{{{}}}>", expr.get_type()),
-            Self::Table(table) => {
-                if inner {
-                    format!("#<table {} rows>", table.len())
-                } else {
-                    let lengths_stringy = table.iter().map(|(k, v)| {
-                        let stringy = v.get(true);
-                        (if k.len() > stringy.len() {
-                            k.len() + 2
-                        } else {
-                            stringy.len() + 2
-                        }, stringy)
-                    }).collect::<Vec<_>>();
+            Self::Table(keys, values) => {
+                let mut length = vec![];
 
-                    let lengths = lengths_stringy.iter().rev().map(|(l, _)| {
-                        l
-                    }).collect::<Vec<_>>();
+                for (idx, key) in keys.iter().enumerate() {
+                    let mut len = key.len();
 
-                    let mut toret = String::new();
-
-                    table.keys().collect::<Vec<_>>().iter().rev().enumerate().for_each(|(idx, _)| {
-                        toret.push_str(&format!("{:─^idx_len$}", "", idx_len=lengths[idx]));
-                        if idx != table.len() - 1 {
-                            toret.push('┬');
-                        } else {
-                            toret.push('\n');
+                    for val in values.iter() {
+                        let got = val[idx].get(true);
+                        if got.len() > len {
+                            len = got.len();
                         }
-                    });
-
-                    table.keys().collect::<Vec<_>>().iter().rev().enumerate().for_each(|(idx, k)| {
-                        toret.push_str(&format!("\x1b[0;32m{:^idx_len$}\x1b[0m", k, idx_len=lengths[idx]));
-                        if idx != table.len() - 1 {
-                            toret.push('│');
-                        } else {
-                            toret.push('\n')
-                        }
-                    });
-
-                    table.keys().collect::<Vec<_>>().iter().rev().enumerate().for_each(|(idx, _)| {
-                        toret.push_str(&format!("{:─^idx_len$}", "", idx_len=lengths[idx]));
-                        if idx != table.len() - 1 {
-                            toret.push('┼');
-                        } else {
-                            toret.push('\n');
-                        }
-                    });
-
-
-                    lengths_stringy.iter().rev().enumerate().for_each(|(idx, (_, v))| {
-                        toret.push_str(&format!("{:^idx_len$}", v, idx_len=lengths[idx]));
-                        if idx != table.len() - 1 {
-                            toret.push('|');
-                        } else {
-                            toret.push('\n');
-                        }
-                    });
-
-                    toret
+                    }
+                    length.push(len + 2);
                 }
+
+                let idx_len = format!("{}", values.len()).len() + 2;
+
+                let mut first_row= format!("{:─^idx_len$}", "", idx_len=idx_len);
+                let mut second_row=  format!("\x1b[1;32m{:^idx_len$}\x1b[0m", "@", idx_len=idx_len);
+
+                for (idx, key) in keys.iter().rev().enumerate() {
+                    first_row.push_str(&format!("┬{:─^length$}", "", length=length[idx]));
+                    second_row.push_str(&format!("│\x1b[1;32m{:^length$}\x1b[0m", key, length=length[idx]));
+                }
+
+                let mut toret = format!("{}\n{}\n{}\n", first_row, second_row, first_row.replace("┬", "┼"));
+
+                for (idx, val) in values.into_iter().enumerate() {
+                    toret.push_str(&format!("\x1b[1;32m{:^idx_len$}\x1b[0m", idx, idx_len=idx_len));
+
+                    for (i, elem)  in val.iter().enumerate() {
+                        toret.push_str(&format!("│{:^length$}", elem.get(inner), length=length[i]));
+                    }
+                    toret.push('\n')
+                }
+                toret.push_str(&format!("{:─^idx_len$}", "", idx_len=idx_len)); 
+                for (idx, _)  in keys.into_iter().enumerate() {
+                    toret.push_str(&format!("┴{:─^length$}", "", length=length[idx]));
+                }
+
+                toret
             }
             Self::Array(vals) => {
                 if inner {
@@ -105,7 +88,7 @@ impl Value {
 
                     let idx_len = format!("{}", stringified.len() - 1).len() + 2;
                     longest += 2;
-                
+
                     let mut toret = format!("{:─^idx_len$}┬{:─^longest$}\n", "", "", idx_len=idx_len, longest=longest);
 
                     for (idx, val) in stringified.into_iter().enumerate() {

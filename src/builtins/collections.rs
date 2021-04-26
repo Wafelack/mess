@@ -25,14 +25,8 @@ impl Interpreter {
             } else {
                 error!("Expected a String or an Array, found a {}.", collection.get_type())
             }
-        } else if let Value::String(idx) = idx {
-            if let Value::Table(table) = collection {
-                Ok(table.get(&idx).unwrap_or(&Value::Unit).clone())
-            } else {
-                error!("Expected a Table, found a {}.", collection.get_type())
-            } 
         } else {
-            error!("Expected a String or a Number, found a {}.", idx.get_type())
+            error!("Expected a Number, found a {}.", idx.get_type())
         }
 
     }

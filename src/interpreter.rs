@@ -20,11 +20,8 @@ impl Interpreter {
     fn call(&mut self, func: String, argv: Vec<Expr>) -> Result<Value> {
         if self.builtins.contains_key(&func) {
             let callback = self.builtins[&func];
-            let mut args = vec![];
-            for arg in argv {
-                args.push(self.eval_expr(arg)?);
-            }
-            callback(self, args)
+            let argv = argv.into_iter().map(|e| self.eval_expr(e)).collect::<Result<Vec<Value>>>()?;
+            callback(self, argv)
         } else if self.procedures.contains_key(&func) {
             let (args, body) = self.procedures[&func].clone();
 
@@ -46,11 +43,7 @@ impl Interpreter {
             }
         } else {
 
-            let mut args = vec![];
-
-            for arg in argv {
-                args.push(self.eval_expr(arg)?);
-            }
+            let args = argv.into_iter().map(|e| self.eval_expr(e)).collect::<Result<Vec<Value>>>()?;
 
             let out = match Command::new(func)
                 .args(args.iter().map(|v| v.get(false)).collect::<Vec<_>>())
@@ -121,22 +114,44 @@ impl Interpreter {
             Expr::Defun(name, args, body) => self.procedure(name, args, body),
             Expr::Quote(e) => Ok(Value::Quote(*e)),
             Expr::Table(t) => {
-                let mut toret = HashMap::new();
+                let mut keys = vec![];
+                let mut values = vec![];
+                let mut prev_len = 0;
+                for (idx, (k, v))in t.into_iter().enumerate() {
+                    let evalued = self.eval_expr(v)?;
+                    keys.push(k);
 
-                for (k, v) in t {
-                    toret.insert(k, self.eval_expr(v)?);
+                    if let Value::Array(vec) = evalued  {
+                        if idx == 0 {
+                            prev_len = vec.len();
+                        } else {
+                            if prev_len != vec.len() {
+                                return error!("Expected {} elements, found {}.", prev_len, vec.len());
+                            }
+                        }
+
+                        values.push(vec);
+
+                    } else {
+                        return error!("Expected an Array, found a {}.", evalued.get_type());
+                    }
                 }
 
-                Ok(Value::Table(toret))
+                let mut vals = vec![];
+
+                for i in 0..prev_len {
+                    let mut tmp = vec![];
+
+                    for value in &values {
+                        tmp.push(value[i].clone());
+                    }
+                    vals.push(tmp);
+                }
+
+                Ok(Value::Table(keys, vals))
             }
             Expr::Array(content) => {
-                let mut values = vec![];
-
-                for elem in content {
-                    values.push(self.eval_expr(elem)?);
-                }
-
-                Ok(Value::Array(values))
+                Ok(Value::Array(content.into_iter().map(|e| self.eval_expr(e)).collect::<Result<Vec<Value>>>()?))
             }
         }
     }
