@@ -1,14 +1,14 @@
-use crate::{Result, error, Error, interpreter::{Value, Interpreter}, parser::Expr};
+use crate::{Result, error, Error, value::Value, interpreter::Interpreter, parser::Expr};
 
 impl Interpreter {
-    pub fn at(&mut self, args: Vec<Expr>) -> Result<Value> {
+    pub fn at(&mut self, args: Vec<Value>) -> Result<Value> {
 
         if args.len() != 2 {
             return error!("Procedure `@` takes 2 arguments, but {} arguments were supplied.", args.len());
         }
 
-        let collection = self.eval_expr(args[0].clone())?;
-        let idx = self.eval_expr(args[1].clone())?;
+        let collection = args[0].clone();
+        let idx = args[1].clone();
 
         if let Value::Number(idx) = idx {
 

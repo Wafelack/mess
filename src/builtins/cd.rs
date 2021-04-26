@@ -1,8 +1,8 @@
-use crate::{Result, error, Error, interpreter::{Value, Interpreter}, parser::{Expr}};
-use std::{env::{self, set_current_dir, current_dir}};
+use crate::{Result, error, Error, value::Value, interpreter::Interpreter, parser::Expr};
+use std::env::{self, set_current_dir, current_dir};
 
 impl Interpreter {
-    pub fn cd(&mut self, args: Vec<Expr>) -> Result<Value> {
+    pub fn cd(&mut self, args: Vec<Value>) -> Result<Value> {
         if !(0..=1).contains(&args.len()) {
             return error!("Function `cd` takes 0 or 1 arguments, but {} arguments were supplied.", args.len());
         }
@@ -28,11 +28,10 @@ impl Interpreter {
                 Err(e) => error!("Failed to change directory to {}: {}.", &home, e),
             }
         } else {
-            let r_path = self.eval_expr(args[0].clone())?; 
-            let path = if let Value::String(s) = r_path {
+            let path = if let Value::String(s) = &args[0] {
                 s.replace("~", &home)
             } else {
-                return error!("Expected a String, found a {}.", r_path.get_type());
+                return error!("Expected a String, found a {}.", args[0].get_type());
             };
 
             self.assign("previous-dir", Expr::String(current))?;
