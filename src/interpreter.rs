@@ -119,6 +119,7 @@ impl Interpreter {
             Expr::Call(func, argv) => self.call(func, argv),
             Expr::Let(name, value) => self.assign(name, *value),
             Expr::Defun(name, args, body) => self.procedure(name, args, body),
+            Expr::Quote(e) => Ok(Value::Quote(*e)),
             Expr::Table(t) => {
                 let mut toret = HashMap::new();
 

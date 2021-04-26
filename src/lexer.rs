@@ -14,6 +14,7 @@ pub enum Token {
     Defun,
     Let,
     Table,
+    Quote,
 }
 impl Token {
     pub fn get_type(&self) -> String {
@@ -27,6 +28,7 @@ impl Token {
             Self::LBracket => "Opening Bracket",
             Self::RBracket => "Closing Bracket",
             Self::Sharp => "Sharp",
+            Self::Quote => "Quote",
             _ => "Keyword"
         }.to_string()
     }
@@ -77,7 +79,8 @@ impl Lexer {
             ')' => self.add_token(Token::RParen),
             '[' => self.add_token(Token::LBracket),
             ']' => self.add_token(Token::RBracket),
-            '"' | '\'' => self.string(c)?,
+            '"' => self.string()?,
+            '\'' => self.add_token(Token::Quote),
             '#' => self.add_token(Token::Sharp),
             ';' => while !self.is_at_end() && self.peek() != '\n' {
                 self.advance();
@@ -131,8 +134,8 @@ impl Lexer {
             }
         }
     }
-    fn string(&mut self, delimiter: char) -> Result<()> {
-        while !self.is_at_end() && self.peek() != delimiter {
+    fn string(&mut self) -> Result<()> {
+        while !self.is_at_end() && !(self.peek() == '\"' && self.input.chars().nth(self.current - 1).unwrap() != '\\'){
             self.advance();
         }
 
@@ -173,9 +176,9 @@ mod lexing{
 
     #[test]
     fn string() -> Result<()> {
-        let tokens = Lexer::new(r#""foobar" 'moobar'"#).tokenize()?;
+        let tokens = Lexer::new(r#""Hello, \"World\" !""#).tokenize()?;
 
-        assert_eq!(tokens, vec![Token::String("foobar".to_string()), Token::String("moobar".to_string())]);
+        assert_eq!(tokens, vec![Token::String(r#"Hello, "World" !"#.to_string())]);
         Ok(())
 
     }
@@ -195,6 +198,12 @@ mod lexing{
         Ok(())
     }
 
+    #[test]
+    fn quote() -> Result<()> {
+        let tokens = Lexer::new("'").tokenize()?;
 
+        assert_eq!(tokens, vec![Token::Quote]);
+        Ok(())
+    }
 
 }

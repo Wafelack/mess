@@ -28,7 +28,7 @@ impl Value {
             Self::Number(n) => format!("{}", n),
             Self::Float(f) => format!("{}", f),
             Self::String(s) => format!("{}", s),
-            Self::Quote(expr) => format!("<#quote{{{:?}}}>", expr),
+            Self::Quote(expr) => format!("<#quote{{{}}}>", expr.get_type()),
             Self::Table(table) => {
                 if inner {
                     format!("#<table {} rows>", table.len())

@@ -12,6 +12,7 @@ pub enum Expr {
     Let(String, Box<Expr>),
     Defun(String, Vec<String>, Vec<Expr>),
     Call(String, Vec<Expr>),
+    Quote(Box<Expr>),
     Unit
 }
 impl Expr {
@@ -24,6 +25,7 @@ impl Expr {
             Self::Call(_, _) => "Function Call",
             Self::Let(_, _) => "Variable Definition",
             Self::Defun(_, _, _) => "Procedure Definition",
+            Self::Quote(_) => "Quote",
             Self::Array(_) => "Array",
             Self::Table(_) => "Table",
             Self::Unit => "Unit",
@@ -109,6 +111,10 @@ impl Parser {
                 } else {
                     panic!("Bug: UNEXPECTED_NON_IDENTIFIER");
                 }
+            }
+            Token::Quote => {
+                let to_ret = self.parse_expr()?;
+                Expr::Quote(Box::new(to_ret))
             }
             Token::LBracket => {
                 let mut content = vec![];
@@ -222,10 +228,10 @@ mod parsing {
 
     #[test]
     fn string() -> Result<()> {
-        let tokens = Lexer::new("'foo' bar").tokenize()?;
+        let tokens = Lexer::new("foobar").tokenize()?;
         let ast = Parser::new(tokens).parse()?;
 
-        assert_eq!(ast, vec![Expr::String("foo".to_string()), Expr::String("bar".to_string())]);
+        assert_eq!(ast, vec![Expr::String("foobar".to_string())]);
 
         Ok(())
     }
@@ -286,6 +292,16 @@ mod parsing {
         let ast = Parser::new(tokens).parse()?;
 
         assert_eq!(ast, vec![Expr::Defun("square".to_string(), vec!["x".to_string()], vec![Expr::Call("*".to_string(), vec![Expr::Var("x".to_string()), Expr::Var("x".to_string())])])]);
+
+        Ok(())
+    }
+
+    #[test]
+    fn quote() -> Result<()> {
+        let tokens = Lexer::new("'foo").tokenize()?;
+        let ast = Parser::new(tokens).parse()?;
+
+        assert_eq!(ast, vec![Expr::Quote(Box::new(Expr::String("foo".to_string())))]);
 
         Ok(())
     }

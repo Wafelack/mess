@@ -19,9 +19,7 @@ fn main() -> Result<()> {
         let mut buffer = String::new();
         io::stdin().read_line(&mut buffer).unwrap();
         let tokens = Lexer::new(buffer.trim()).tokenize()?;
-        println!("{:#?}", tokens);
         let ast = Parser::new(tokens).parse()?;
-        println!("{:#?}", ast);
         interpreter.update_ast(ast);
         let output = interpreter.eval()?;
         if let Value::Unit = output {
@@ -50,6 +48,7 @@ pub fn apply_escape(input: &str) -> String {
         .replace("\\r", "\r")
         .replace("\\t", "\t")
         .replace("\\0", "\0")
+        .replace("\\\"", "\"")
         .replace("\\\\", "\\")
         .to_string()
 }
