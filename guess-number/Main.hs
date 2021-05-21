@@ -2,7 +2,7 @@ import System.Random
 game :: Int -> Int -> IO Int
 game correct counter = do
     guess <- getLine
-    case correct `compare` (read guess :: Int) of 
+    case correct `compare` (read guess) of 
         LT -> do
              putStrLn "Less."
              game correct (counter + 1)
