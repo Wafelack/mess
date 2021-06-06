@@ -1,10 +1,10 @@
 #ifndef _VEC_H_
 #define _VEC_H_
 
-#include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 
 typedef struct {
     int32_t * content;

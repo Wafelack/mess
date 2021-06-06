@@ -1,4 +1,5 @@
 #include "vec.h"
+#include "bf.h"
 #include <stdio.h>
 
 int
@@ -25,5 +26,9 @@ main(void)
     int32_t aa[] = { 1, 2, 3 };
     Vec * a = Vec_from(aa, 3);
     assert(a->content[0] == 1);
+
+    VM * vm = VM_init("++++++[->++++++++++<]>+++++.", 255);
+    VM_run(vm);
+    assert(vm->memory[0] == 'A');
     return EXIT_SUCCESS;
 }
