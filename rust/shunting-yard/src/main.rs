@@ -147,7 +147,7 @@ fn run(code: &[Token]) -> Result<f64, Error> {
         stack.push(lhs.powf(rhs));
     });
     functions.insert('!', |stack: &mut Vec<f64>| {
-        let v = pop(stack).ceil() as i64;
+        let v = pop(stack).round() as i64;
         stack.push(fact(v) as f64);
     });
 
