@@ -1,5 +1,5 @@
-import mill._, scalalib._
+import mill._, scalalib._, scalafmt._
 
-object scalabf extends ScalaModule {
-  def scalaVersion = "2.13.1"
+object scalabf extends ScalaModule with ScalafmtModule {
+  def scalaVersion = "3.0.0"
 }
